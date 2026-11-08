@@ -227,14 +227,18 @@ export default function App() {
         className="relative z-10 flex flex-col items-center justify-center w-full max-w-[380px] min-h-[420px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 1. 시작 전 (idle) 화면: 스폿을 숨기고 설명과 추첨 준비 버튼만 중앙에 배치 */}
+        {/* 1. 시작 전 (idle) 화면: 스폿을 숨기고 직관적인 타이틀과 설명, 추첨 준비 버튼 배치 */}
         {gameState === 'idle' && (
-          <div className="flex flex-col items-center justify-center text-center p-6 bg-neutral-900/60 rounded-3xl border border-neutral-800/80 shadow-2xl backdrop-blur-sm animate-fade-in w-full max-w-[320px]">
-            <p className="text-[12px] text-neutral-200 font-medium mb-1.5 leading-relaxed">
-              추첨 준비 버튼을 누른 후 3초 안에 원하는 스폿에 손가락을 올려주세요!
+          <div className="flex flex-col items-center justify-center text-center p-6 bg-neutral-900/70 rounded-3xl border border-neutral-800 shadow-2xl backdrop-blur-sm animate-fade-in w-full max-w-[320px]">
+            <h2 className="text-[14px] font-bold text-neutral-100 mb-3 flex items-center justify-center gap-1.5">
+              <span>👆</span> 손가락 복불복
+            </h2>
+            <p className="text-[12px] text-neutral-200 font-medium mb-2 leading-relaxed whitespace-pre-line">
+              게임이 시작되면 각자 원하는 스폿 1개씩을 손가락으로 찜하세요!
+              그중 선택받은 당첨자 1명이 나옵니다.
             </p>
-            <p className="text-[11px] text-neutral-400 mb-6 font-normal">
-              (모바일 전용)
+            <p className="text-[11px] text-neutral-400 mb-5 leading-normal">
+              (추첨 준비 버튼을 누른 후 3초 안에 올려주세요 · 모바일 전용)
             </p>
             <button
               type="button"
