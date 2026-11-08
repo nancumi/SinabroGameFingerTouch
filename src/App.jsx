@@ -224,142 +224,150 @@ export default function App() {
 
       {/* 중앙 핵심 콘텐츠 컨테이너 */}
       <div
-        className="relative z-10 flex flex-col items-center justify-center w-full max-w-[380px] aspect-square"
+        className="relative z-10 flex flex-col items-center justify-center w-full max-w-[380px] min-h-[420px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 3x3 터치 스폿 그리드 */}
-        <div className="grid grid-cols-3 gap-5 sm:gap-6 w-full h-full p-2 place-items-center">
-          {Array.from({ length: 9 }).map((_, index) => {
-            const isPressed = pressedSpots.has(index);
-            const isWinner = winnerSpot === index;
-            const isParticipating = participatingSpots.has(index);
-            const isVanish = (gameState === 'eliminating' || gameState === 'result') && !isParticipating;
-            const color = SPOT_COLORS[index];
-
-            return (
-              <div
-                key={index}
-                ref={(el) => (spotRefs.current[index] = el)}
-                onPointerDown={(e) => handleSpotPointerDown(index, e)}
-                onPointerUp={(e) => handleSpotPointerUp(index, e)}
-                onPointerCancel={(e) => handleSpotPointerUp(index, e)}
-                className={`relative flex items-center justify-center rounded-full transition-all duration-300 select-none
-                  w-[72px] h-[72px] sm:w-[84px] sm:h-[84px]
-                  ${isVanish ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'}
-                  ${isPressed ? 'scale-95' : ''}
-                `}
-                style={{ touchAction: 'none' }}
-              >
-                {/* 당첨된 경우: 손가락에 가려져 있어도 주변을 강력하게 깜빡거리며 밝혀주는 다중 후광 링 */}
-                {isWinner && (
-                  <>
-                    {/* 초대형 외곽 깜빡임 링 1 */}
-                    <div
-                      className="absolute -inset-10 sm:-inset-14 rounded-full border-4 border-yellow-300 animate-winner-flash pointer-events-none z-30"
-                      style={{
-                        boxShadow: '0 0 50px 20px rgba(250, 204, 21, 0.9), inset 0 0 30px 10px rgba(250, 204, 21, 0.6)',
-                      }}
-                    />
-                    {/* 외곽 파동 링 2 */}
-                    <div
-                      className="absolute -inset-16 sm:-inset-20 rounded-full border-2 border-amber-400 animate-ripple pointer-events-none z-20"
-                    />
-                    {/* 당첨자 텍스트 라벨 (스폿 바로 위로 돌출되어 손가락 위에서도 명확히 확인 가능) */}
-                    <div className="absolute -top-7 sm:-top-8 px-2 py-0.5 rounded-full bg-yellow-400 text-neutral-900 font-extrabold text-[11px] shadow-lg animate-bounce pointer-events-none z-40 whitespace-nowrap">
-                      ★ 당첨 ★
-                    </div>
-                  </>
-                )}
-
-                {/* 눌려 있을 때 외곽 펄스 링 */}
-                {isPressed && !isWinner && (
-                  <div
-                    className="absolute -inset-3 rounded-full border border-sky-400/60 animate-ping opacity-60 pointer-events-none"
-                    style={{ borderColor: color.glow }}
-                  />
-                )}
-
-                {/* 본체 스폿 원형 버튼 */}
-                <div
-                  style={{
-                    boxShadow: isWinner
-                      ? '0 0 35px rgba(250,204,21,1)'
-                      : isPressed
-                      ? `0 0 25px ${color.glow}`
-                      : undefined,
-                  }}
-                  className={`w-full h-full rounded-full border-2 flex items-center justify-center transition-all duration-200 cursor-pointer
-                    ${isWinner
-                      ? 'bg-yellow-400 border-yellow-200 text-neutral-900'
-                      : isPressed
-                      ? `${color.activeBg} ${color.border} text-white`
-                      : `${color.bg} ${color.border} text-neutral-400 hover:border-neutral-200 active:scale-95`
-                    }
-                  `}
-                >
-                  {/* 중앙 원형 코어 인디케이터 */}
-                  <div
-                    className={`w-3.5 h-3.5 rounded-full transition-transform duration-200 ${
-                      isWinner
-                        ? 'bg-neutral-900 scale-125'
-                        : isPressed
-                        ? 'bg-white scale-150'
-                        : 'bg-white/40'
-                    }`}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* 중앙 인터랙션 레이어 (추첨 준비 버튼 / 카운트다운 / 결과 안내) */}
-        <div className="mt-8 flex flex-col items-center justify-center min-h-[72px] text-center w-full px-2">
-          {gameState === 'idle' && (
-            <div className="flex flex-col items-center">
-              <p className="text-[12px] text-neutral-300 font-normal mb-3 text-center leading-relaxed max-w-[280px]">
-                추첨 준비 버튼을 누른 후 3초 안에 원하는 스폿에 손가락을 올려주세요!
-              </p>
-              <button
-                type="button"
-                onClick={handleStart}
-                className="px-8 py-3 rounded-2xl bg-neutral-100 hover:bg-white text-neutral-950 font-bold text-[12px] tracking-wider shadow-[0_0_20px_rgba(255,255,255,0.25)] hover:shadow-[0_0_28px_rgba(255,255,255,0.45)] active:scale-95 transition-all"
-              >
-                추첨 준비
-              </button>
-            </div>
-          )}
-
-          {gameState === 'countdown' && (
-            <div className="flex flex-col items-center animate-pulse">
-              <span className="text-[12px] font-medium text-amber-300 tracking-tight">
-                원하는 스폿에 손가락을 올려주세요!
-              </span>
-            </div>
-          )}
-
-          {gameState === 'eliminating' && (
-            <div className="flex flex-col items-center animate-pulse">
-              <span className="text-[12px] font-medium text-neutral-400 tracking-tight">
-                추첨 진행 중...
-              </span>
-            </div>
-          )}
-
-          {gameState === 'result' && (
-            <div
-              onClick={resetGame}
-              className="flex flex-col items-center cursor-pointer animate-fade-in text-center"
+        {/* 1. 시작 전 (idle) 화면: 스폿을 숨기고 설명과 추첨 준비 버튼만 중앙에 배치 */}
+        {gameState === 'idle' && (
+          <div className="flex flex-col items-center justify-center text-center p-6 bg-neutral-900/60 rounded-3xl border border-neutral-800/80 shadow-2xl backdrop-blur-sm animate-fade-in w-full max-w-[320px]">
+            <p className="text-[12px] text-neutral-200 font-medium mb-1.5 leading-relaxed">
+              추첨 준비 버튼을 누른 후 3초 안에 원하는 스폿에 손가락을 올려주세요!
+            </p>
+            <p className="text-[11px] text-neutral-400 mb-6 font-normal">
+              (모바일 전용)
+            </p>
+            <button
+              type="button"
+              onClick={handleStart}
+              className="w-full py-3 px-6 rounded-2xl bg-neutral-100 hover:bg-white text-neutral-950 font-bold text-[12px] tracking-wider shadow-[0_0_20px_rgba(255,255,255,0.25)] hover:shadow-[0_0_28px_rgba(255,255,255,0.45)] active:scale-95 transition-all"
             >
-              <div className="text-[12px] font-semibold text-yellow-300 drop-shadow-[0_0_10px_rgba(253,224,71,0.6)]">
-                당첨자 탄생!
-              </div>
-              <div className="text-[11px] text-neutral-400 mt-1">
-                화면을 터치하면 다시 시작합니다
-              </div>
+              추첨 준비
+            </button>
+          </div>
+        )}
+
+        {/* 2. 게임 진행 (countdown, eliminating, result) 화면: 3x3 터치 스폿 그리드 노출 */}
+        {gameState !== 'idle' && (
+          <>
+            <div className="grid grid-cols-3 gap-5 sm:gap-6 w-full aspect-square p-2 place-items-center animate-fade-in">
+              {Array.from({ length: 9 }).map((_, index) => {
+                const isPressed = pressedSpots.has(index);
+                const isWinner = winnerSpot === index;
+                const isParticipating = participatingSpots.has(index);
+                const isVanish = (gameState === 'eliminating' || gameState === 'result') && !isParticipating;
+                const color = SPOT_COLORS[index];
+
+                return (
+                  <div
+                    key={index}
+                    ref={(el) => (spotRefs.current[index] = el)}
+                    onPointerDown={(e) => handleSpotPointerDown(index, e)}
+                    onPointerUp={(e) => handleSpotPointerUp(index, e)}
+                    onPointerCancel={(e) => handleSpotPointerUp(index, e)}
+                    className={`relative flex items-center justify-center rounded-full transition-all duration-300 select-none
+                      w-[72px] h-[72px] sm:w-[84px] sm:h-[84px]
+                      ${isVanish ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'}
+                      ${isPressed ? 'scale-95' : ''}
+                    `}
+                    style={{ touchAction: 'none' }}
+                  >
+                    {/* 당첨된 경우: 손가락에 가려져 있어도 주변을 강력하게 깜빡거리며 밝혀주는 다중 후광 링 */}
+                    {isWinner && (
+                      <>
+                        {/* 초대형 외곽 깜빡임 링 1 */}
+                        <div
+                          className="absolute -inset-10 sm:-inset-14 rounded-full border-4 border-yellow-300 animate-winner-flash pointer-events-none z-30"
+                          style={{
+                            boxShadow: '0 0 50px 20px rgba(250, 204, 21, 0.9), inset 0 0 30px 10px rgba(250, 204, 21, 0.6)',
+                          }}
+                        />
+                        {/* 외곽 파동 링 2 */}
+                        <div
+                          className="absolute -inset-16 sm:-inset-20 rounded-full border-2 border-amber-400 animate-ripple pointer-events-none z-20"
+                        />
+                        {/* 당첨자 텍스트 라벨 (스폿 바로 위로 돌출되어 손가락 위에서도 명확히 확인 가능) */}
+                        <div className="absolute -top-7 sm:-top-8 px-2 py-0.5 rounded-full bg-yellow-400 text-neutral-900 font-extrabold text-[11px] shadow-lg animate-bounce pointer-events-none z-40 whitespace-nowrap">
+                          ★ 당첨 ★
+                        </div>
+                      </>
+                    )}
+
+                    {/* 눌려 있을 때 외곽 펄스 링 */}
+                    {isPressed && !isWinner && (
+                      <div
+                        className="absolute -inset-3 rounded-full border border-sky-400/60 animate-ping opacity-60 pointer-events-none"
+                        style={{ borderColor: color.glow }}
+                      />
+                    )}
+
+                    {/* 본체 스폿 원형 버튼 */}
+                    <div
+                      style={{
+                        boxShadow: isWinner
+                          ? '0 0 35px rgba(250,204,21,1)'
+                          : isPressed
+                          ? `0 0 25px ${color.glow}`
+                          : undefined,
+                      }}
+                      className={`w-full h-full rounded-full border-2 flex items-center justify-center transition-all duration-200 cursor-pointer
+                        ${isWinner
+                          ? 'bg-yellow-400 border-yellow-200 text-neutral-900'
+                          : isPressed
+                          ? `${color.activeBg} ${color.border} text-white`
+                          : `${color.bg} ${color.border} text-neutral-400 hover:border-neutral-200 active:scale-95`
+                        }
+                      `}
+                    >
+                      {/* 중앙 원형 코어 인디케이터 */}
+                      <div
+                        className={`w-3.5 h-3.5 rounded-full transition-transform duration-200 ${
+                          isWinner
+                            ? 'bg-neutral-900 scale-125'
+                            : isPressed
+                            ? 'bg-white scale-150'
+                            : 'bg-white/40'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          )}
-        </div>
+
+            {/* 하단 진행 상태 안내 */}
+            <div className="mt-8 flex flex-col items-center justify-center min-h-[50px] text-center w-full px-2">
+              {gameState === 'countdown' && (
+                <div className="flex flex-col items-center animate-pulse">
+                  <span className="text-[12px] font-medium text-amber-300 tracking-tight">
+                    원하는 스폿에 손가락을 올려주세요!
+                  </span>
+                </div>
+              )}
+
+              {gameState === 'eliminating' && (
+                <div className="flex flex-col items-center animate-pulse">
+                  <span className="text-[12px] font-medium text-neutral-400 tracking-tight">
+                    추첨 진행 중...
+                  </span>
+                </div>
+              )}
+
+              {gameState === 'result' && (
+                <div
+                  onClick={resetGame}
+                  className="flex flex-col items-center cursor-pointer animate-fade-in text-center"
+                >
+                  <div className="text-[12px] font-semibold text-yellow-300 drop-shadow-[0_0_10px_rgba(253,224,71,0.6)]">
+                    당첨자 탄생!
+                  </div>
+                  <div className="text-[11px] text-neutral-400 mt-1">
+                    화면을 터치하면 다시 시작합니다
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* 안내 모달창 (alert 대체) */}
